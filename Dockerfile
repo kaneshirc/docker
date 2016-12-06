@@ -6,6 +6,18 @@ RUN sed -i".original" -e "s/\/\/archive.ubuntu.com/\/\/ftp.jaist.ac.jp/g" /etc/a
 # ソフトウェアインストール
 RUN apt-get update && apt-get install -y \
     build-essential \
+    autoconf \
+    bison \
+    libxslt-dev \
+    libssl-dev \
+    libreadline-dev \
+    zlib1g-dev \
+    libyaml-dev \
+    libreadline6-dev \
+    libncurses5-dev \
+    libffi-dev \
+    libgdbm3 \
+    libgdbm-dev \
     openssh-server \
     locales \
     language-pack-ja \
@@ -14,13 +26,21 @@ RUN apt-get update && apt-get install -y \
     vim \
     git \
     tig \
-    tree \
-    libxslt-dev
+    tree
 
-# anyenv
-RUN git clone https://github.com/riywo/anyenv ~/.anyenv \
- && echo 'export PATH="$HOME/.anyenv/bin:$PATH"' >> ~/.bashrc \
- && echo 'eval "$(anyenv init -)"' >> ~/.bashrc
+# pyenv
+RUN git clone https://github.com/yyuu/pyenv.git ~/.pyenv \
+ && git clone https://github.com/yyuu/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv \
+ && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile \
+ && echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile \
+ && echo 'eval "$(pyenv init -)"' >> ~/.bash_profile \
+ && echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bash_profile
+
+# rbenv
+RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
+ && git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build \
+ && cd ~/.rbenv && src/configure && make -C src \
+ && echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
 
 # 日本時間
 # ref: https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes/683607
