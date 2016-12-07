@@ -43,7 +43,9 @@ RUN git clone https://github.com/yyuu/pyenv.git ~/.pyenv \
 RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
  && git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build \
  && cd ~/.rbenv && src/configure && make -C src \
+ && echo 'export RBENV_ROOT="$HOME/.rbenv"' >> ~/.bash_profile \
  && echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+ && echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
 
 # 日本時間
 # ref: https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes/683607
