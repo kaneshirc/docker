@@ -1,4 +1,8 @@
 FROM ubuntu:16.04
+MAINTAINER Naoki Kaneshiro
+
+ARG user="kaneshiro"
+ARG password="password"
 
 # リポジトリを日本に変更
 RUN sed -i".original" -e "s/\/\/archive.ubuntu.com/\/\/ftp.jaist.ac.jp/g" /etc/apt/sources.list
@@ -29,23 +33,8 @@ RUN apt-get update && apt-get install -y \
     vim \
     git \
     tig \
-    tree
-
-# pyenv
-RUN git clone https://github.com/yyuu/pyenv.git ~/.pyenv \
- && git clone https://github.com/yyuu/pyenv-virtualenv.git ~/.pyenv/plugins/pyenv-virtualenv \
- && echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile \
- && echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile \
- && echo 'eval "$(pyenv init -)"' >> ~/.bash_profile \
- && echo 'eval "$(pyenv virtualenv-init -)"' >> ~/.bash_profile
-
-# rbenv
-RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
- && git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build \
- && cd ~/.rbenv && src/configure && make -C src \
- && echo 'export RBENV_ROOT="$HOME/.rbenv"' >> ~/.bash_profile \
- && echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile \
- && echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+    tree \
+    sudo
 
 # 日本時間
 # ref: https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes/683607
@@ -59,11 +48,17 @@ RUN sed -i".original" -e "s/# ja_JP.UTF-8 UTF-8/ja_JP.UTF-8 UTF-8/g" /etc/locale
 # ssh
 # refs: https://docs.docker.com/engine/examples/running_ssh_service/
 RUN mkdir /var/run/sshd \
- && echo 'root:docker' | chpasswd \
  && sed -i".original" -e 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
  && sed -i".original" -e 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so@g' -i /etc/pam.d/sshd
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
+# user
+# add user
+RUN groupadd -g 1000 $user && \
+    useradd -g $user -G sudo -m -s /bin/bash $user && \
+    echo "$user:$password" | chpasswd
+
+USER root
 EXPOSE 22
 CMD ["/usr/sbin/sshd", "-D"]
